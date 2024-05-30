@@ -1,2 +1,4 @@
 -I..
--lreadline
+-I/usr/include/libxml2
+
+
