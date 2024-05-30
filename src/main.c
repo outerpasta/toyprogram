@@ -8,14 +8,19 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-const int WIDTH = 800, HEIGHT = 600;
+static const int WIDTH = 800, HEIGHT = 600;
 
-int window(void);
-void repl(void);
-void parse(void);
-void openDocument(void);
+static int window(void);
+static void repl(void);
+static void parse(void);
+static void openDocument(void);
+static void print_element_names(xmlNode *);
+static int parse_example(void);
 
-int main(void) {
+int main(int argc, char* argv[]){
+  for (int i=0;i<argc;i++)
+    printf("%s ", argv[i]);
+  puts("");
   puts("Hello World!");
   puts("This is " PACKAGE_STRING ".");
   repl();
@@ -25,7 +30,7 @@ int main(void) {
 /**
  * Read evaluate print loop
  */
-void repl(void) {
+static void repl(void) {
   char *inpt;
   int i = 0;
   while ( i < 10 ) {
@@ -39,6 +44,8 @@ void repl(void) {
       break;
     } else if (strcmp(inpt, "open") == 0) {
       openDocument();
+    } else if (strcmp(inpt, "open2") == 0) {
+      parse_example();
     } else if (strcmp(inpt, "window") == 0 ||
                strcmp(inpt, "win") == 0) {
       window();
@@ -48,31 +55,49 @@ void repl(void) {
   }
 }
 
-/**
- * Parse the document
- */
-void parse(void) {
+static void print_element_names(xmlNode * a_node) {
+   xmlNode *cur_node = NULL;
+
+   for (cur_node = a_node; cur_node; cur_node =
+      cur_node->next) {
+      if (cur_node->type == XML_ELEMENT_NODE) {
+         printf("node type: Element, name: %sn",
+            cur_node->name);
+      }
+      print_element_names(cur_node->children);
+   }
+}
+
+static int parse_example(void) {
+  char* url = "/home/alxbary/vm-shared-folder/toyprogram-art/tiles.tsx";
+  xmlDoc *doc = NULL;
+  xmlNode *root_element = NULL;
+  LIBXML_TEST_VERSION
+  if ((doc = xmlReadFile(url, NULL, 0)) == NULL){
+    printf("error: could not parse file.\n");
+    exit(-1);
+  }
+
+  root_element = xmlDocGetRootElement(doc);
+  print_element_names(root_element);
+  xmlFreeDoc(doc);
+  xmlCleanupParser();
+  return 0;
+}
+
+static void openDocument(void) {
   xmlDocPtr document;
+  LIBXML_TEST_VERSION
   document = xmlReadFile("/home/alxbary/vm-shared-folder/toyprogram-art/tiles.tsx", NULL, 0);
   xmlChar* filname = document->last->children->next->properties->children->content;
   xmlChar* tilewidth   = document->children->properties->next->next->next->children->content;
   xmlChar* tileheight   = document->children->properties->next->next->next->next->children->content;
   printf("%s,%s,%s\n", filname, tilewidth, tileheight);
   xmlFreeDoc(document);
-}
-
-/**
- * Open the document
- */
-void openDocument(void) {
-  LIBXML_TEST_VERSION parse();
   xmlCleanupParser();
 }
 
-/**
- * Display window
- */
-int window(void) {
+static int window(void) {
   SDL_Window *window;
   SDL_Renderer *renderer;
   if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {

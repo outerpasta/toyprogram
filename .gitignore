@@ -1,6 +1,7 @@
 *.[ao]
 *~
 /src/toy
+notes.txt
 
 # http://www.gnu.org/software/automake
 

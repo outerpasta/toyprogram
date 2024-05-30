@@ -1,5 +1,4 @@
 This is a demonstration package for GNU Automake.
 Type 'info Automake' to read the Automake manual.
 
-CFLAGS="$(xml2-config --cflags)" ./configure
-
+./configure LDFLAGS="-ggdb3" CFLAGS="-ggdb3 -Og $(xml2-config --cflags)"
