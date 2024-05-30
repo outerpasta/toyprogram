@@ -1,8 +1,10 @@
 #include <config.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>
-#include <stdlib.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <libxml/parser.h>
@@ -13,23 +15,64 @@ static const int WIDTH = 800, HEIGHT = 600;
 static int window(void);
 static void repl(void);
 static void parse(void);
-static void openDocument(void);
+static void open_document(void);
 static void print_element_names(xmlNode *);
 static int parse_example(void);
+static int getopt_example(int, char**);
 
 int main(int argc, char* argv[]){
   for (int i=0;i<argc;i++)
     printf("%s ", argv[i]);
   puts("");
-  puts("Hello World!");
   puts("This is " PACKAGE_STRING ".");
+  getopt_example(argc, argv);
   repl();
   return 0;
 }
 
-/**
- * Read evaluate print loop
- */
+static int getopt_example(int argc, char* argv[]) {
+  int aflag = 0;
+  int bflag = 0;
+  char* cvalue = NULL;
+  int index;
+  int c;
+
+  opterr = 0;
+
+  while ((c = getopt (argc, argv, "abc:")) != -1)
+    switch (c) {
+      case 'a':
+        aflag = 1;
+        break;
+      case 'b':
+        bflag = 1;
+        break;
+      case 'c':
+        cvalue = optarg;
+        break;
+      case '?':
+        if (optopt == 'c')
+          fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+        else if (isprint (optopt))
+          fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+        else
+          fprintf (stderr,
+                   "Unknown option character `\\x%x'.\n",
+                   optopt);
+        return 1;
+      default:
+        abort();
+      }
+
+
+  printf ("aflag = %d, bflag = %d, cvalue = %s\n",
+          aflag, bflag, cvalue);
+
+  for (index = optind; index < argc; index++)
+    printf ("Non-option argument %s\n", argv[index]);
+  return 0;
+}
+
 static void repl(void) {
   char *inpt;
   int i = 0;
@@ -43,7 +86,7 @@ static void repl(void) {
         strcmp(inpt, "exit") == 0) {
       break;
     } else if (strcmp(inpt, "open") == 0) {
-      openDocument();
+      open_document();
     } else if (strcmp(inpt, "open2") == 0) {
       parse_example();
     } else if (strcmp(inpt, "window") == 0 ||
@@ -61,7 +104,7 @@ static void print_element_names(xmlNode * a_node) {
    for (cur_node = a_node; cur_node; cur_node =
       cur_node->next) {
       if (cur_node->type == XML_ELEMENT_NODE) {
-         printf("node type: Element, name: %sn",
+         printf("node type: Element, name: %s\n",
             cur_node->name);
       }
       print_element_names(cur_node->children);
@@ -85,7 +128,7 @@ static int parse_example(void) {
   return 0;
 }
 
-static void openDocument(void) {
+static void open_document(void) {
   xmlDocPtr document;
   LIBXML_TEST_VERSION
   document = xmlReadFile("/home/alxbary/vm-shared-folder/toyprogram-art/tiles.tsx", NULL, 0);
