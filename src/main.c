@@ -10,7 +10,8 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-static const int WIDTH = 800, HEIGHT = 600;
+/* static const int WIDTH = 800, HEIGHT = 600; */
+static const int WIDTH = 256, HEIGHT = 256;
 
 static int window(void);
 static void repl(void);
@@ -131,7 +132,7 @@ static int parse_example(void) {
 static void open_document(void) {
   xmlDocPtr document;
   LIBXML_TEST_VERSION
-  document = xmlReadFile("/home/alxbary/vm-shared-folder/toyprogram-art/tiles.tsx", NULL, 0);
+  document = xmlReadFile("/mnt/user/toyprogram-art/toyprogram-art/tiles.tsx", NULL, 0);
   xmlChar* filname = document->last->children->next->properties->children->content;
   xmlChar* tilewidth   = document->children->properties->next->next->next->children->content;
   xmlChar* tileheight   = document->children->properties->next->next->next->next->children->content;
@@ -143,8 +144,14 @@ static void open_document(void) {
 static int window(void) {
   SDL_Window *window;
   SDL_Renderer *renderer;
+  SDL_Surface *screenSurface;
   if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-    printf("SDL_Init failed: %s\n", SDL_GetError());
+    fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
+    return 1;
+  }
+
+  if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
+    fprintf(stderr, "could not initialize sdl2_image: %s\n", IMG_GetError());
     return 1;
   }
 
@@ -154,16 +161,38 @@ static int window(void) {
 			    WIDTH, HEIGHT,
 			    SDL_WINDOW_ALLOW_HIGHDPI);
   if(window == NULL) {
-    printf("Could not create window: %s\n", SDL_GetError());
+    fprintf(stderr, "Could not create window: %s\n", SDL_GetError());
     return 1;
   }
-  
+
+  screenSurface = SDL_GetWindowSurface(window);
+  if (screenSurface == NULL) {
+    fprintf(stderr, "could not get window: %s\n", SDL_GetError());
+    return 1;
+  }
+
+  SDL_Surface *img = IMG_Load("/mnt/user/toyprogram-art/tropical-background.png");
+  if (img == NULL) {
+    fprintf(stderr, "could not load image: %s\n", IMG_GetError());
+    return 1;
+  }
+  SDL_Surface* optimizedImg = SDL_ConvertSurface(img, screenSurface->format, 0);
+  if (optimizedImg == NULL) fprintf(stderr, "could not optimize image: %s\n", SDL_GetError());
+  SDL_FreeSurface(img);
+
+  SDL_BlitSurface(optimizedImg, NULL, screenSurface, NULL);
+  SDL_UpdateWindowSurface(window);
+
+  /* SDL_Delay(2000); */
+
+  SDL_FreeSurface(optimizedImg);
+
   renderer = SDL_CreateRenderer(window, -1, 0);
   SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
   SDL_RenderClear(renderer);
 
   SDL_RenderPresent(renderer);
-  
+
   SDL_Event event;
   while(1) {
     if(SDL_PollEvent(&event)) {
@@ -173,6 +202,7 @@ static int window(void) {
     }
   }
 
+  SDL_FreeSurface(screenSurface);
   SDL_DestroyWindow(window);
 
   SDL_Quit();
