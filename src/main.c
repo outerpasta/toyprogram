@@ -26,7 +26,12 @@ int main(int argc, char* argv[]){
     printf("%s ", argv[i]);
   puts("");
   puts("This is " PACKAGE_STRING ".");
-  getopt_example(argc, argv);
+
+  if (getopt_example(argc, argv) != 0) {
+    fprintf(stderr, "Incorrect usage.\n");
+    return 1;
+  }
+
   repl();
   return 0;
 }
@@ -113,7 +118,7 @@ static void print_element_names(xmlNode * a_node) {
 }
 
 static int parse_example(void) {
-  char* url = "/home/alxbary/vm-shared-folder/toyprogram-art/tiles.tsx";
+  char* url = "toyprogram-share/tiles.tsx";
   xmlDoc *doc = NULL;
   xmlNode *root_element = NULL;
   LIBXML_TEST_VERSION
@@ -132,7 +137,7 @@ static int parse_example(void) {
 static void open_document(void) {
   xmlDocPtr document;
   LIBXML_TEST_VERSION
-  document = xmlReadFile("/mnt/user/toyprogram-art/toyprogram-art/tiles.tsx", NULL, 0);
+  document = xmlReadFile("toyprogram-share/tiles.tsx", NULL, 0);
   xmlChar* filname = document->last->children->next->properties->children->content;
   xmlChar* tilewidth   = document->children->properties->next->next->next->children->content;
   xmlChar* tileheight   = document->children->properties->next->next->next->next->children->content;
@@ -171,7 +176,7 @@ static int window(void) {
     return 1;
   }
 
-  SDL_Surface *img = IMG_Load("/mnt/user/toyprogram-art/tropical-background.png");
+  SDL_Surface *img = IMG_Load("toyprogram-share/tropical-background.png");
   if (img == NULL) {
     fprintf(stderr, "could not load image: %s\n", IMG_GetError());
     return 1;
