@@ -1,19 +1,18 @@
-#include <config.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <config.h>
+#include <ctype.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <readline/history.h>
+#include <readline/readline.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 static const int WIDTH = 256, HEIGHT = 256;
-static const char* HELP_TEXT =
-  "Usage:\n"
-  " toy\n";
+static const char *HELP_TEXT = "Usage:\n"
+                               " toy\n";
 
 static int print_help(void);
 static int window(void);
@@ -22,10 +21,10 @@ static void parse(void);
 static void open_document(void);
 static void print_element_names(xmlNode *);
 static int parse_example(void);
-static int getopt_example(int, char**);
+static int getopt_example(int, char **);
 
-int main(int argc, char* argv[]){
-  for (int i=0;i<argc;i++)
+int main(int argc, char *argv[]) {
+  for (int i = 0; i < argc; i++)
     printf("%s ", argv[i]);
   puts("");
   puts("This is " PACKAGE_STRING ".");
@@ -48,17 +47,17 @@ static int print_help(void) {
   return 0;
 }
 
-static int getopt_example(int argc, char* argv[]) {
+static int getopt_example(int argc, char *argv[]) {
   int aflag = 0;
   int bflag = 0;
   int hflag = 0;
-  char* cvalue = NULL;
+  char *cvalue = NULL;
   int index;
   int c;
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "abhc:")) != -1) {
+  while ((c = getopt(argc, argv, "abhc:")) != -1) {
     switch (c) {
     case 'a':
       aflag = 1;
@@ -74,18 +73,19 @@ static int getopt_example(int argc, char* argv[]) {
       break;
     case '?':
       if (optopt == 'c')
-	fprintf (stderr, "Option -%c requires an argument.\n", optopt);
-      else if (isprint (optopt))
-	fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+        fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+      else if (isprint(optopt))
+        fprintf(stderr, "Unknown option `-%c'.\n", optopt);
       else
-	fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
+        fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
       return 1;
     default:
       abort();
     }
   }
 
-  printf ("aflag = %d, bflag = %d, hflag = %d, cvalue = %s\n", aflag, bflag, hflag, cvalue);
+  printf("aflag = %d, bflag = %d, hflag = %d, cvalue = %s\n", aflag, bflag,
+         hflag, cvalue);
 
   for (index = optind; index < argc; index++) {
     printf("Non-option argument %s\n", argv[index]);
@@ -102,14 +102,14 @@ static int getopt_example(int argc, char* argv[]) {
 static int repl(void) {
   char *inpt;
   int i = 0;
-  while ( i < 10 ) {
+  while (i < 10) {
     inpt = readline(">> ");
-    if (!inpt) return 0;
+    if (!inpt)
+      return 0;
     add_history(inpt);
     ++i;
 
-    if (strcmp(inpt, "quit") == 0 ||
-        strcmp(inpt, "exit") == 0) {
+    if (strcmp(inpt, "quit") == 0 || strcmp(inpt, "exit") == 0) {
       break;
     } else if (strcmp(inpt, "help") == 0) {
       print_help();
@@ -117,8 +117,7 @@ static int repl(void) {
       open_document();
     } else if (strcmp(inpt, "open2") == 0) {
       parse_example();
-    } else if (strcmp(inpt, "window") == 0 ||
-               strcmp(inpt, "win") == 0) {
+    } else if (strcmp(inpt, "window") == 0 || strcmp(inpt, "win") == 0) {
       window();
     } else if (strcmp(inpt, "") != 0) {
       printf("%s\n", inpt);
@@ -131,7 +130,7 @@ static int repl(void) {
   return 0;
 }
 
-static void print_element_names(xmlNode * a_node) {
+static void print_element_names(xmlNode *a_node) {
   xmlNode *cur_node = NULL;
 
   for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
@@ -145,7 +144,7 @@ static void print_element_names(xmlNode * a_node) {
 }
 
 static int parse_example(void) {
-  char* url = "toyprogram-share/tiles.tsx";
+  char *url = "toyprogram-share/tiles.tsx";
   xmlDoc *doc = NULL;
   xmlNode *root_element = NULL;
 
@@ -167,9 +166,12 @@ static void open_document(void) {
   xmlDocPtr document;
   LIBXML_TEST_VERSION
   document = xmlReadFile("toyprogram-share/tiles.tsx", NULL, 0);
-  xmlChar* filname = document->last->children->next->properties->children->content;
-  xmlChar* tilewidth   = document->children->properties->next->next->next->children->content;
-  xmlChar* tileheight   = document->children->properties->next->next->next->next->children->content;
+  xmlChar *filname =
+      document->last->children->next->properties->children->content;
+  xmlChar *tilewidth =
+      document->children->properties->next->next->next->children->content;
+  xmlChar *tileheight =
+      document->children->properties->next->next->next->next->children->content;
   printf("%s,%s,%s\n", filname, tilewidth, tileheight);
   xmlFreeDoc(document);
   xmlCleanupParser();
@@ -179,7 +181,7 @@ static int window(void) {
   SDL_Window *window;
   SDL_Renderer *renderer;
   SDL_Surface *screenSurface;
-  if(SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+  if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
     fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
     return 1;
   }
@@ -189,12 +191,10 @@ static int window(void) {
     return 1;
   }
 
-  window = SDL_CreateWindow("Hello, World!",
-			    SDL_WINDOWPOS_UNDEFINED,
-			    SDL_WINDOWPOS_UNDEFINED,
-			    WIDTH, HEIGHT,
-			    SDL_WINDOW_ALLOW_HIGHDPI);
-  if(window == NULL) {
+  window = SDL_CreateWindow("Hello, World!", SDL_WINDOWPOS_UNDEFINED,
+                            SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT,
+                            SDL_WINDOW_ALLOW_HIGHDPI);
+  if (window == NULL) {
     fprintf(stderr, "Could not create window: %s\n", SDL_GetError());
     return 1;
   }
@@ -210,8 +210,9 @@ static int window(void) {
     fprintf(stderr, "could not load image: %s\n", IMG_GetError());
     return 1;
   }
-  SDL_Surface* optimizedImg = SDL_ConvertSurface(img, screenSurface->format, 0);
-  if (optimizedImg == NULL) fprintf(stderr, "could not optimize image: %s\n", SDL_GetError());
+  SDL_Surface *optimizedImg = SDL_ConvertSurface(img, screenSurface->format, 0);
+  if (optimizedImg == NULL)
+    fprintf(stderr, "could not optimize image: %s\n", SDL_GetError());
   SDL_FreeSurface(img);
 
   SDL_BlitSurface(optimizedImg, NULL, screenSurface, NULL);
@@ -228,9 +229,9 @@ static int window(void) {
   SDL_RenderPresent(renderer);
 
   SDL_Event event;
-  while(1) {
-    if(SDL_PollEvent(&event)) {
-      if(event.type == SDL_QUIT) {
+  while (1) {
+    if (SDL_PollEvent(&event)) {
+      if (event.type == SDL_QUIT) {
         break;
       }
     }
