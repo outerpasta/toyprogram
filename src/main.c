@@ -10,11 +10,13 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-/* static const int WIDTH = 800, HEIGHT = 600; */
 static const int WIDTH = 256, HEIGHT = 256;
+static const char *HELP_TEXT = "Usage:\n"
+  " toy\n";
 
+static int print_help(void);
 static int window(void);
-static void repl(void);
+static int repl(void);
 static void parse(void);
 static void open_document(void);
 static void print_element_names(xmlNode *);
@@ -32,65 +34,84 @@ int main(int argc, char* argv[]){
     return 1;
   }
 
-  repl();
+  if (repl() != 0) {
+    fprintf(stderr, "Incorrect usage of REPL, exiting.\n");
+    return 1;
+  }
+
+  return 0;
+}
+
+static int print_help(void) {
+  printf("%s", HELP_TEXT);
   return 0;
 }
 
 static int getopt_example(int argc, char* argv[]) {
   int aflag = 0;
   int bflag = 0;
+  int hflag = 0;
   char* cvalue = NULL;
   int index;
   int c;
 
   opterr = 0;
 
-  while ((c = getopt (argc, argv, "abc:")) != -1)
+  while ((c = getopt (argc, argv, "abhc:")) != -1) {
     switch (c) {
-      case 'a':
-        aflag = 1;
-        break;
-      case 'b':
-        bflag = 1;
-        break;
-      case 'c':
-        cvalue = optarg;
-        break;
-      case '?':
-        if (optopt == 'c')
-          fprintf (stderr, "Option -%c requires an argument.\n", optopt);
-        else if (isprint (optopt))
-          fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-        else
-          fprintf (stderr,
-                   "Unknown option character `\\x%x'.\n",
-                   optopt);
-        return 1;
-      default:
-        abort();
-      }
+    case 'a':
+      aflag = 1;
+      break;
+    case 'b':
+      bflag = 1;
+      break;
+    case 'c':
+      cvalue = optarg;
+      break;
+    case 'h':
+      hflag = 1;
+      break;
+    case '?':
+      if (optopt == 'c')
+	fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+      else if (isprint (optopt))
+	fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+      else
+	fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
+      return 1;
+    default:
+      abort();
+    }
+  }
 
+  printf ("aflag = %d, bflag = %d, hflag = %d, cvalue = %s\n", aflag, bflag, hflag, cvalue);
 
-  printf ("aflag = %d, bflag = %d, cvalue = %s\n",
-          aflag, bflag, cvalue);
+  for (index = optind; index < argc; index++) {
+    printf("Non-option argument %s\n", argv[index]);
+  }
 
-  for (index = optind; index < argc; index++)
-    printf ("Non-option argument %s\n", argv[index]);
+  if (hflag == 1) {
+    print_help();
+    return 1;
+  }
+
   return 0;
 }
 
-static void repl(void) {
+static int repl(void) {
   char *inpt;
   int i = 0;
   while ( i < 10 ) {
     inpt = readline(">> ");
-    if (!inpt) return;
+    if (!inpt) return 0;
     add_history(inpt);
     ++i;
 
     if (strcmp(inpt, "quit") == 0 ||
         strcmp(inpt, "exit") == 0) {
       break;
+    } else if (strcmp(inpt, "help") == 0) {
+      print_help();
     } else if (strcmp(inpt, "open") == 0) {
       open_document();
     } else if (strcmp(inpt, "open2") == 0) {
@@ -100,29 +121,36 @@ static void repl(void) {
       window();
     } else if (strcmp(inpt, "") != 0) {
       printf("%s\n", inpt);
+    } else {
+      fprintf(stderr, "Incorrect usage.\n");
+      return 1;
     }
   }
+
+  return 0;
 }
 
 static void print_element_names(xmlNode * a_node) {
-   xmlNode *cur_node = NULL;
+  xmlNode *cur_node = NULL;
 
-   for (cur_node = a_node; cur_node; cur_node =
-      cur_node->next) {
-      if (cur_node->type == XML_ELEMENT_NODE) {
-         printf("node type: Element, name: %s\n",
-            cur_node->name);
-      }
-      print_element_names(cur_node->children);
-   }
+  for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
+    if (cur_node->type == XML_ELEMENT_NODE) {
+      printf("node type: Element, name: %s\n", cur_node->name);
+    } else {
+      printf("node type: %d\n", cur_node->type);
+    }
+    print_element_names(cur_node->children);
+  }
 }
 
 static int parse_example(void) {
   char* url = "toyprogram-share/tiles.tsx";
   xmlDoc *doc = NULL;
   xmlNode *root_element = NULL;
+
   LIBXML_TEST_VERSION
-  if ((doc = xmlReadFile(url, NULL, 0)) == NULL){
+
+  if ((doc = xmlReadFile(url, NULL, 0)) == NULL) {
     printf("error: could not parse file.\n");
     exit(-1);
   }
