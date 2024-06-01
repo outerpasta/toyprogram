@@ -11,7 +11,8 @@
 #include <libxml/tree.h>
 
 static const int WIDTH = 256, HEIGHT = 256;
-static const char *HELP_TEXT = "Usage:\n"
+static const char* HELP_TEXT =
+  "Usage:\n"
   " toy\n";
 
 static int print_help(void);
