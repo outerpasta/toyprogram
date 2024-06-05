@@ -1,16 +1,16 @@
 /* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Define to 1 if you have the 'readline' library (-lreadline). */
+/* Define to 1 if you have the `readline' library (-lreadline). */
 #define HAVE_LIBREADLINE 1
 
-/* Define to 1 if you have the 'SDL2' library (-lSDL2). */
+/* Define to 1 if you have the `SDL2' library (-lSDL2). */
 #define HAVE_LIBSDL2 1
 
-/* Define to 1 if you have the 'SDL2_image' library (-lSDL2_image). */
+/* Define to 1 if you have the `SDL2_image' library (-lSDL2_image). */
 #define HAVE_LIBSDL2_IMAGE 1
 
-/* Define to 1 if you have the 'xml2' library (-lxml2). */
+/* Define to 1 if you have the `xml2' library (-lxml2). */
 #define HAVE_LIBXML2 1
 
 /* Name of package */
